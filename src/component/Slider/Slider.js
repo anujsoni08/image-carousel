@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useSwipeable } from "react-swipeable";
+
 import {
   SliderItem,
   SliderContainer,
@@ -10,10 +12,20 @@ import {
 } from "./styles";
 
 const Slider = (props) => {
-  const width = useWindowWidth();
+  const { images } = props;
+
   const [bulletStatus, setBulletStatus] = useState(true);
   const [arrowStatus, setArrowStatus] = useState(true);
-  const { images } = props;
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const width = useWindowWidth();
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => prevSlide(),
+    onSwipedRight: () => nextSlide(),
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true,
+  });
 
   function useWindowWidth() {
     const [width, setWidth] = useState(window.innerWidth);
@@ -30,8 +42,6 @@ const Slider = (props) => {
     return width;
   }
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-
   const nextSlide = () => {
     setCurrentIndex(() => {
       if (currentIndex === images.length - 1) {
@@ -44,7 +54,6 @@ const Slider = (props) => {
 
   const prevSlide = () => {
     setCurrentIndex(() => {
-      console.log(currentIndex);
       if (currentIndex === 0) {
         return images.length - 1;
       } else {
@@ -54,14 +63,18 @@ const Slider = (props) => {
   };
 
   const onBulletClick = (index) => {
-    console.log(index);
     setCurrentIndex(index);
   };
 
   return (
     <div>
-      <SliderContainer className={"slider-instance"} height={"500px"}>
+      <SliderContainer
+        {...swipeHandlers}
+        className={"slider-instance"}
+        height={"500px"}
+      >
         <SliderWrapper
+          {...swipeHandlers}
           width={width * images.length}
           style={{
             transform: `translateX(${-(currentIndex * width)}px)`,
